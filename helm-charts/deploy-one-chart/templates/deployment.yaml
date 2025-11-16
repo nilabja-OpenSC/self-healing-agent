@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "deploy-one-chart.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "deploy-one-chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "deploy-one-chart.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "deploy-one-chart.fullname" . }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      volumes:
+        - name: applogs
+          emptyDir: {}
+        - name: promtail-config
+          configMap:
+            name: {{ .Values.configMapName }}
+      containers:
+        - name: app
+          image: "{{ .Values.image.app.repository }}:{{ .Values.image.app.tag }}"
+          imagePullPolicy: {{ .Values.image.app.pullPolicy }}
+          ports:
+            - containerPort: 9100
+          volumeMounts:
+            - name: applogs
+              mountPath: {{ .Values.volumes.applogs }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              /bin/node_exporter &
+              while true; do
+                msg="$(date) Hello from deploy-one"
+                echo "$msg" | tee -a {{ .Values.volumes.applogs }}/app.log
+                sleep 5
+              done
+        - name: promtail
+          image: "{{ .Values.image.promtail.repository }}:{{ .Values.image.promtail.tag }}"
+          imagePullPolicy: {{ .Values.image.promtail.pullPolicy }}
+          args:
+            - -config.file={{ .Values.volumes.promtailConfig }}/promtail.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: promtail-config
+              mountPath: {{ .Values.volumes.promtailConfig }}
+            - name: applogs
+              mountPath: {{ .Values.volumes.applogs }}
+          resources:
+            {{- toYaml .Values.resources.promtail | nindent 12 }}

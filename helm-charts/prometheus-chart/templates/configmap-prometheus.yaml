@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: {{ .Values.namespace }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 30s
+      evaluation_interval: 30s
+
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets:
+                - "{{ .Values.alertmanager.host }}"
+
+    rule_files:
+      - "/etc/prometheus/rules/alert.rules.yml"
+
+    scrape_configs:
+{{- range .Values.scrapeTargets }}
+      - job_name: "{{ .job_name }}"
+        static_configs:
+          - targets: [{{ range $i, $t := .targets }}{{ if $i }}, {{ end }}"{{ $t }}"{{ end }}]
+            labels:
+{{- range $key, $val := .labels }}
+              {{ $key }}: "{{ $val }}"
+{{- end }}
+{{- end }}

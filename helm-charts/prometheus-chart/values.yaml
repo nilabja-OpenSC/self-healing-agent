@@ -1,0 +1,36 @@
+namespace: vigneshbaskar-dev
+replicaCount: 1
+
+image:
+  repository: prom/prometheus
+  tag: latest
+  pullPolicy: Always
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+service:
+  type: ClusterIP
+  port: 9090
+
+alertmanager:
+  host: "172.30.107.173:9093"
+
+scrapeTargets:
+  - job_name: "prometheus"
+    targets: ["localhost:9090"]
+    labels:
+      app: "prometheus"
+  - job_name: "deploy-one"
+    targets: ["172.30.20.193:9100"]
+    labels:
+      app: "deploy-one"
+  - job_name: "deploy-two"
+    targets: ["172.30.46.144:9100"]
+    labels:
+      app: "deploy-two"

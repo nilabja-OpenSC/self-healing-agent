@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: prometheus
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus-sa
+      containers:
+        - name: prometheus
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --config.file=/etc/prometheus/config/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --web.enable-lifecycle
+          ports:
+            - containerPort: 9090
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+          volumeMounts:
+            - name: prometheus-storage
+              mountPath: /prometheus
+            - name: rules-volume
+              mountPath: /etc/prometheus/rules
+            - name: prometheus-config-volume
+              mountPath: /etc/prometheus/config
+      volumes:
+        - name: prometheus-storage
+          emptyDir: {}
+        - name: rules-volume
+          configMap:
+            name: prometheus-alert-rules
+        - name: prometheus-config-volume
+          configMap:
+            name: prometheus-config

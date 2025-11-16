@@ -1,0 +1,38 @@
+replicaCount: 1
+namespace: nhaldar-dev
+
+image:
+  app:
+    repository: prom/node-exporter
+    tag: latest
+    pullPolicy: IfNotPresent
+  promtail:
+    repository: grafana/promtail
+    tag: 3.1.0
+    pullPolicy: IfNotPresent
+
+serviceAccountName: default
+
+resources:
+  promtail:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+volumes:
+  applogs: /var/log/app-logs
+  promtailConfig: /etc/promtail/config
+
+configMapName: promtail-config
+
+loki:
+  url: http://loki:3100/loki/api/v1/push
+  httpPort: 9080
+  grpcPort: 0
+  fileName: /tmp/positions.yaml
+  jobName: app-logs
+  job: deploy-one
+  path: /var/log/app-logs/*.log  

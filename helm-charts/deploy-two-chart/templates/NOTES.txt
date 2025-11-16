@@ -1,0 +1,19 @@
+1. Create namespace:
+   kubectl create ns <namespace-name>
+
+1. To install this chart:
+   helm install deploy-one ./deploy-one-chart --namespace <namespace-name>
+
+2. Ensure Loki is accessible at {{ .Values.loki.url }}
+
+3. Show about deployment:
+   helm show all deploy-one-chart
+
+4. List releases accross all namespace:
+   helm list -A
+
+5. Check deploy status:
+   helm status deploy-one -n nhaldar-dev
+
+6. Deploy updated helm charts:
+   helm upgrade deploy-one deploy-one-chart -n nhaldar-dev

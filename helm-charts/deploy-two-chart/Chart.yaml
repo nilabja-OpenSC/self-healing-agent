@@ -1,0 +1,6 @@
+apiVersion: v2
+name: deploy-two-chart
+description: A Helm chart for deploy-two with Promtail sidecar
+type: application
+version: 0.1.0
+appVersion: "1.0"
