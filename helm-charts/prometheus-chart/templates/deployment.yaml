@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prometheus
+  name: {{ .Values.Name }}
   namespace: {{ .Values.namespace }}
   labels:
-    app: prometheus
+    app: {{ .Values.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: prometheus
+      app: {{ .Values.Name }}
   template:
     metadata:
       labels:
-        app: prometheus
+        app: {{ .Values.Name }}
     spec:
-      serviceAccountName: prometheus-sa
+      serviceAccountName: {{ .Values.saName }}
       containers:
-        - name: prometheus
+        - name: {{ .Values.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
@@ -25,7 +25,7 @@ spec:
             - --storage.tsdb.path=/prometheus
             - --web.enable-lifecycle
           ports:
-            - containerPort: 9090
+            - containerPort: {{ .Values.containerPort }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
@@ -34,18 +34,17 @@ spec:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
           volumeMounts:
-            - name: prometheus-storage
-              mountPath: /prometheus
-            - name: rules-volume
-              mountPath: /etc/prometheus/rules
-            - name: prometheus-config-volume
-              mountPath: /etc/prometheus/config
+          {{- range .Values.volumeMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
       volumes:
-        - name: prometheus-storage
-          emptyDir: {}
-        - name: rules-volume
-          configMap:
-            name: prometheus-alert-rules
-        - name: prometheus-config-volume
-          configMap:
-            name: prometheus-config
+        {{- range .Values.volumes }}
+          - name: {{ .name }}
+            {{- if eq .type "emptyDir" }}
+            emptyDir: {}
+            {{- else if eq .type "configMap" }}
+            configMap:
+              name: {{ .configMapName }}
+            {{- end }}
+        {{- end }}

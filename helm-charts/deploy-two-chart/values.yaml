@@ -1,5 +1,5 @@
 replicaCount: 1
-namespace: nhaldar-dev
+namespace: nilabja-haldar-dev
 
 image:
   app:
@@ -36,3 +36,8 @@ loki:
   jobName: app-logs
   job: deploy-one
   path: /var/log/app-logs/*.log  
+
+prometheus:
+  scrape: "true"
+  port: "9100"
+  path: "/metrics"   

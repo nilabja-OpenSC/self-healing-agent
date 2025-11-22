@@ -14,8 +14,8 @@ data:
             labels:
               severity: critical
             annotations:
-              summary: "Pod {{ $labels.app }} is down"
-              description: "Pod {{ $labels.app }} with instance {{ $labels.instance }} is not reporting metrics for more than 1 minute."
+              summary: "Pod {{` $labels.app `}} is down"
+              description: "Pod {{` $labels.app `}} with instance {{` $labels.instance `}} is not reporting metrics for more than 1 minute."
 
           - alert: HighCPUUsage
             expr: rate(process_cpu_seconds_total[1m]) > 0.5
@@ -23,4 +23,4 @@ data:
             labels:
               severity: warning
             annotations:
-              summary: "High CPU usage in {{ $labels.app }}"
+              summary: "High CPU usage in {{` $labels.app `}}"
