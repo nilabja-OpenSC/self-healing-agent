@@ -40,4 +40,5 @@ loki:
 prometheus:
   scrape: true
   port: 9100
-  path: /metrics 
+  #path: /metrics
+  path: /actuator/prometheus

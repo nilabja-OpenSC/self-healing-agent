@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     prometheus.io/scrape: {{ .Values.prometheus.scrape | quote }}
+    prometheus.io/path: {{ .Values.prometheus.path }}
   labels:
     app: deploy-one
 spec:

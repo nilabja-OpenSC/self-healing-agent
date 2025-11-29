@@ -19,13 +19,53 @@ data:
       - "/etc/prometheus/rules/alert.rules.yml"
 
     scrape_configs:
-    {{ .Values.prometheus.scrapeConfigs | indent 6 }}
-#{{- range .Values.scrapeTargets }}
-#      - job_name: "{{ .job_name }}"
-#        static_configs:
-#          - targets: [{{ range $i, $t := .targets }}{{ if $i }}, {{ end }}"{{ $t }}"{{ end }}]
-#            labels:
-#{{- range $key, $val := .labels }}
-#              {{ $key }}: "{{ $val }}"
-#{{- end }}
-#{{- end }}
+      # Monitor Prometheus itself
+      - job_name: "prometheus"
+        static_configs:
+          - targets: ["localhost:9090"]
+            labels:
+              app: "prometheus"
+
+    {{- if .Values.scrapeConfigs.deployOne.enabled }}
+      - job_name: "{{ .Values.scrapeConfigs.deployOne.jobName }}"
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - "{{ .Values.namespace }}"
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: "{{ .Values.scrapeConfigs.deployOne.appLabel }}"
+            action: keep
+
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Running
+            action: keep
+
+          - source_labels: [__meta_kubernetes_pod_container_port_number]
+            regex: "{{ .Values.scrapeConfigs.deployOne.port }}"
+            action: keep
+    {{- end }}
+
+    {{- if .Values.scrapeConfigs.deployTwo.enabled }}
+      - job_name: "{{ .Values.scrapeConfigs.deployTwo.jobName }}"
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - "{{ .Values.namespace }}"
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: "{{ .Values.scrapeConfigs.deployTwo.appLabel }}"
+            action: keep
+
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Running
+            action: keep
+
+          - source_labels: [__meta_kubernetes_pod_container_port_number]
+            regex: "{{ .Values.scrapeConfigs.deployTwo.port }}"
+            action: keep
+    {{- end }}

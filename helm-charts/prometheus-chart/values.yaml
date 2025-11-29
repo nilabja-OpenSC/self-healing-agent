@@ -79,71 +79,20 @@ prometheus:
   scrapeInterval: 30s
   evaluationInterval: 30s
 
-  scrapeConfigs: |
-    # Scrape Prometheus itself
-    - job_name: "prometheus"
-      static_configs:
-        - targets: ["localhost:9090"]
+scrapeConfigs:
+  deployOne:
+    enabled: true
+    jobName: "deploy-one"
+    namespace: "nilabja-haldar-dev"
+    appLabel: "deploy-one-deploy-one-chart"
+    port: "9100"
 
-    # Auto-discovery of all pods through annotations
-    - job_name: "kubernetes-service-endpoints"
-      kubernetes_sd_configs:
-        - role: endpoints
-
-      relabel_configs:
-        # Only scrape service with prometheus.io/scrape="true"
-        - action: keep
-          regex: "true"
-          source_labels:
-          - __meta_kubernetes_service_annotation_prometheus_io_scrape
-
-        - source_labels: [__meta_kubernetes_service_port_name]
-          regex: ".*"
-          action: keep
-
-        # Add namespace label
-        - source_labels: [__meta_kubernetes_namespace]
-          action: replace
-          target_label: namespace
-
-        # Add service name label
-        - source_labels: [__meta_kubernetes_service_name]
-          action: replace
-          target_label: service
-
-        # Set metrics path from annotation
-        #- source_labels: __meta_kubernetes_pod_annotation_prometheus_io_path
-        #  action: replace
-        #  target_label: __metrics_path__
-        #  regex: (.+)
-
-        # Set the port from annotation
-        #- source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port, __meta_kubernetes_pod_ip]
-        #  regex: "(.+);(.+)"
-        #  replacement: "$2:$1"
-        #  action: replace
-        #  target_label: __address__
-
-        # Bring all pod labels
-        #- action: labelmap
-        # regex: __meta_kubernetes_pod_label_(.+)
-        
-        #- action: replace
-        #  regex: (.+)
-        #  source_labels:
-        #  - __meta_kubernetes_pod_annotation_prometheus_io_path
-
-
-
-        # Add namespace label
-        #- source_labels: __meta_kubernetes_namespace
-        #  action: replace
-        #  target_label: namespace
-
-        # Add pod name label
-        #- source_labels: __meta_kubernetes_pod_name
-        #  action: replace
-        #  target_label: pod
+  deployTwo:
+    enabled: true
+    jobName: "deploy-two"
+    namespace: "nilabja-haldar-dev"
+    appLabel: "deploy-two-deploy-two-chart"
+    port: "9100"
 
 roleName: prometheus-cluster-role
 roleBindingName: prometheus-cluster-role-binding
