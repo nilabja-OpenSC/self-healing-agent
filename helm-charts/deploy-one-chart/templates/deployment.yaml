@@ -5,6 +5,10 @@ metadata:
   namespace: {{ .Values.namespace }}
   labels:
     {{- include "deploy-one-chart.labels" . | nindent 4 }}
+  annotations:
+    prometheus.io/scrape: {{ .Values.prometheus.scrape | quote }}
+    prometheus.io/port: {{ .Values.prometheus.port | quote }}
+    prometheus.io/path: {{ .Values.prometheus.path | quote }}    
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -15,9 +19,9 @@ spec:
       labels:
         app: {{ include "deploy-one-chart.fullname" . }}
       annotations:
-        prometheus.io/scrape: {{ .Values.prometheus.scrape }}
-        prometheus.io/port: {{ .Values.prometheus.port }}
-        prometheus.io/path: {{ .Values.prometheus.path }}
+        prometheus.io/scrape: {{ .Values.prometheus.scrape | quote }}
+        prometheus.io/port: {{ .Values.prometheus.port | quote }}
+        prometheus.io/path: {{ .Values.prometheus.path | quote }}
     spec:
       serviceAccountName: {{ .Values.serviceAccountName }}
       volumes:

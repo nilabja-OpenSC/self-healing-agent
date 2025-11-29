@@ -38,6 +38,6 @@ loki:
   path: /var/log/app-logs/*.log
 
 prometheus:
-  scrape: "true"
-  port: "9100"
-  path: "/metrics" 
+  scrape: true
+  port: 9100
+  path: /metrics 

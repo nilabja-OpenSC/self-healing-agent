@@ -26,7 +26,7 @@ volumes:
   applogs: /var/log/app-logs
   promtailConfig: /etc/promtail/config
 
-configMapName: promtail-config
+configMapName: promtail-config-two
 
 loki:
   url: http://loki:3100/loki/api/v1/push
@@ -38,6 +38,6 @@ loki:
   path: /var/log/app-logs/*.log  
 
 prometheus:
-  scrape: "true"
-  port: "9100"
-  path: "/metrics"   
+  scrape: true
+  port: 9100
+  path: /metrics   
