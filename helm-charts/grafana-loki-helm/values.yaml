@@ -1,9 +1,19 @@
-namespace: vigneshbaskar-dev
+namespace: nilabja-haldar-dev
+
+datasources:
+ prometheusService: prometheus
+
+route:
+  name: grafana
+  tls:
+    termination: edge        # Options: edge | passthrough | reencrypt
+    insecurePolicy: Allow    # Options: Allow | Redirect | None 
 
 grafana:
   image: grafana/grafana:latest
   replicas: 1
   service:
+    name: grafana
     port: 3000
   config:
     grafanaIni: |
@@ -16,7 +26,15 @@ grafana:
           type: loki
           url: http://loki:3100
           access: proxy
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: http://{{ .Values.datasources.prometheusService }}.{{ .Release.Namespace }}.svc.cluster.local:9090
           isDefault: true
+          editable: true       
+
+dashboard:
+  enabled: true              
 
 loki:
   image: grafana/loki:3.1.1

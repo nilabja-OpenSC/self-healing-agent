@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loki
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: loki
 spec:
@@ -15,9 +15,7 @@ spec:
       labels:
         app: loki
     spec:
-      securityContext:
-        runAsUser: 1002950000
-        fsGroup: 1002950000
+      securityContext: {}
       containers:
         - name: loki
           image: {{ .Values.loki.image }}

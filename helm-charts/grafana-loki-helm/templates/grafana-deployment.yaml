@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: grafana
 spec:
@@ -27,6 +27,12 @@ spec:
             - name: grafana-datasource
               mountPath: /etc/grafana/provisioning/datasources/loki.yaml
               subPath: provisioning-datasources-loki.yaml
+            - name: dashboard-provider
+              mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
+              subPath: dashboards.yaml
+            - name: loki-dashboard
+              mountPath: /var/lib/grafana/dashboards/loki-pods-dashboard.json
+              subPath: loki-pods-dashboard.json            
       volumes:
         - name: grafana-config
           configMap:
@@ -34,3 +40,9 @@ spec:
         - name: grafana-datasource
           configMap:
             name: grafana-config
+        - name: dashboard-provider
+          configMap:
+            name: grafana-dashboard-provider
+        - name: loki-dashboard
+          configMap:
+            name: grafana-grafana-loki-stack-loki-dashboard         

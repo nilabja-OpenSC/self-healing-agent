@@ -26,6 +26,61 @@ data:
             labels:
               app: "prometheus"
 
+      # ----------------------------
+      # Scrape Kubernetes API Server
+      # ----------------------------
+      - job_name: 'kubernetes-apiservers'
+        kubernetes_sd_configs:
+          - role: endpoints
+        scheme: https
+        tls_config:
+          insecure_skip_verify: true
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_endpoints_name]
+            action: keep
+            regex: default;kubernetes
+
+      # ----------------------------
+      # Scrape Kubelets
+      # ----------------------------
+      - job_name: 'kubelet'
+        scheme: https
+        metrics_path: /metrics
+        kubernetes_sd_configs:
+          - role: node
+        tls_config:
+          insecure_skip_verify: true
+        relabel_configs:
+          - target_label: __address__
+            replacement: $1:10250
+            source_labels: [__address__]
+
+      # ----------------------------
+      # Scrape cAdvisor
+      # ----------------------------
+      - job_name: 'kubelet-cadvisor'
+        scheme: https
+        metrics_path: /metrics/cadvisor
+        kubernetes_sd_configs:
+          - role: node
+        tls_config:
+          insecure_skip_verify: true
+        relabel_configs:
+          - target_label: __address__
+            replacement: $1:10250
+            source_labels: [__address__]
+
+      # ----------------------------
+      # Scrape kube-state-metrics
+      # ----------------------------
+      - job_name: 'kube-state-metrics'
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: kube-state-metrics
+            action: keep              
+
     {{- if .Values.scrapeConfigs.deployOne.enabled }}
       - job_name: "{{ .Values.scrapeConfigs.deployOne.jobName }}"
         kubernetes_sd_configs:
